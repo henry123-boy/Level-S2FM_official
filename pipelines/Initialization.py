@@ -127,6 +127,13 @@ class Initializer():
         sched = getattr(torch.optim.lr_scheduler, getattr(opt.optim.sched, "type"))
         self.sched = sched(self.optim, gamma=(lr_sdf_end / lr_sdf) ** (1. / max_iter))
 
+    @torch.no_grad()
+    def print_loss(self, loss_dict):
+        loss_dict_reduced = {}
+        for key in loss_dict.keys():
+            loss_dict_reduced[key] = loss_dict[key].item()
+        print(loss_dict_reduced)
+
     def run(self,
             cameraset: Camera.CameraSet,
             pointset: Point3D.Point3DSet,
@@ -161,14 +168,17 @@ class Initializer():
                              ret=ret, Renderer=Renderer)
 
             loss = self.compute_loss(ret)
-            print(loss)
+            # print(loss)
+            self.print_loss(loss_dict=loss) #TODO: suppress the print
             loss = self.summarize_loss(self.opt, loss)
             loss.all.backward()
 
             self.optim.step()
             self.sched.step()
         print("----------------final loss-----------------")
-        print(loss)
+        # print(loss)
+        self.print_loss(loss_dict=loss)
+
         # ------------update feat tracks&Point3D---------------------
         with torch.no_grad():
             pts_surface = ret.pts_surface.view(2, -1, 3)  # [2,N,3]
