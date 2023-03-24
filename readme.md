@@ -1,1 +1,1 @@
-# Level-S$^2$fM: Structure from Motion on Neural Level Set of Implicit Surfaces
+# Level-S<sup>2</sup>fM: Structure from Motion on Neural Level Set of Implicit Surfaces
