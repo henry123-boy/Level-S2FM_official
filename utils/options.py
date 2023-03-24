@@ -45,7 +45,7 @@ def parse_arguments(args):
     opt_cmd = edict(opt_cmd)
     return opt_cmd
 
-def set(opt_cmd={}):
+def set(opt_cmd={},safe_check=True):
     log.info("setting configurations...")
     assert("pipeline" in opt_cmd)
     # load config from yaml file
@@ -53,7 +53,7 @@ def set(opt_cmd={}):
     fname = "options/{}.yaml".format(opt_cmd.yaml)
     opt_base = load_options(fname)
     # override with command line arguments
-    opt = override_options(opt_base,opt_cmd,key_stack=[],safe_check=True)
+    opt = override_options(opt_base,opt_cmd,key_stack=[],safe_check=safe_check)
     process_options(opt)
     log.options(opt)
     return opt
