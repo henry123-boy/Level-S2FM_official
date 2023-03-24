@@ -1,0 +1,136 @@
+_parent_: options/base.yaml
+
+Res: 100
+
+Ablate_config:
+  sdf_filter: true                                         # on -> use the sdf to filter the outlier
+  tri_trad: false                                          # on -> use the traditional triangulation method
+  ba_trad: false                                           # on -> use the traditional ba method based on torch
+  dual_field: false                                         # on -> use two fields represent the geo&rad
+  refine_again: false
+
+SDF: # Signed Distance Function
+  arch:
+    layers: [ null,64,16 ]                                 # hidden layers for SDF
+    skip: []                                               # skip connections
+    density_activ: softplus                                # activation function for output volume density
+  NN_Init:
+    scale_mlp: 1                                           # to scale up/down the init sdf value
+    bias: 1.0                                              # init sdf sphere
+    tf_init: true
+  VolSDF: # VolSDF options
+    outside_scene: "builtin"                               # choice from [builtin,nerfplusplus]
+    max_upsample_iter: 6                                   # up sample iteratioms, as in the VolSDF paper
+    sample_intvs: 128                                       # the init number of samples
+    final_sample_intvs: 64                                 # according to paper the final sample intervals are 64
+    volsdf_sampling: false
+    iters_max_st: 20                                       # max iteration number of sphere tracing
+    eps: 0.1
+    beta_init: 0.05                                         # beta init for density-dist transform
+    rescale: 1.0
+    beta_speed: 1.0
+    sdf_threshold: 1e-3
+  Hash_config:
+    config_file: options/config_hash_sdf.json              # the config file for hash config of sdf
+
+RadF: # Radiance Field
+  arch:
+    layers: [ null,64,64,3 ]                               # hidden layers for SDF
+    skip: [ ]                                               # skip connections
+  Hash_config:
+    config_file: options/config_hash_rad.json              # the config file for hash config of sdf
+
+camera: # camera options
+  model: perspective                                       # type of camera model
+  ndc: false                                               # reparametrize as normalized device coordinates (NDC)
+  noise: false
+
+data: # data options
+  bg_sdf:                                                  # make the sdf = torch.min(sdf,rad-pts_norm)
+  bg_rad: 2                                                # bg rad
+  num_workers: 4                                           # number of parallel workers for data loading
+  preload: true                                            # preload the entire dataset into the memory
+  dataset:                                                 # dataset name
+  scene:                                                   # scene name
+  bgcolor:
+  bound_min:                                               # boundary for hash encoding
+  bound_max:
+
+optim:
+  algo: Adam
+  algo_split: SGD
+  optim_split: true
+  use_grad_clip: false
+  init: # optim config for initialization
+    max_iter: 500
+    lr_sdf: 1.e-3
+    lr_sdf_end: 1.e-4
+    lr_color: 1.e-2
+    lr_color_end: 1.e-3
+  geoinit: # optim for Triangulation
+    max_iter: 100
+    lr_sdf: 1.e-3
+    lr_sdf_end: 1.e-3
+  ba: # optim for ba
+    max_iter: 1000
+    lr_sdf: 1.e-4
+    lr_sdf_end: 5.e-5
+    lr_pose: 1.e-2
+    lr_pose_end: 5.e-3
+    lr_color: 1.e-3
+    lr_color_end: 5.e-4
+    lr_pose_r: 5.e-3
+    lr_pose_t: 1.e-2
+  refine:
+    max_iter: 500
+    lr_sdf: 1.e-3
+    lr_sdf_end: 5.e-4
+    lr_color: 1.e-3
+    lr_color_end: 5.e-4
+  sched: # learning rate scheduling options
+    type: ExponentialLR                                  # scheduler (see PyTorch doc)
+    gamma:
+  lr: 1.e-3                                                # learning rate (main)
+  lr_end: 1.e-4
+  lr_pose_pnp: 8.e-2                                       # learning rate of pose
+  lr_pose_pnp_end: 8.e-3
+
+
+loss_weight: # loss weights (in log scale)
+
+  init:
+    reproj_error: 0
+    eikonal_loss: 2
+    sdf_surf: 2
+    rgb: 3
+    DC_Loss: 0
+  geoinit:
+    reproj_error: 0
+    tracing_loss: 1
+    sdf_surf: 2
+    eikonal_loss: 2
+  ba:
+    reproj_error: 0
+    eikonal_loss: 2
+    sdf_surf: 2
+    rgb: 3
+    DC_Loss: 0
+    tracing_loss: 1
+  refine:
+    eikonal_loss: 2
+    rgb: 3
+    DC_Loss: 0
+    tracing_loss: 2
+    sdf_surf: 2
+
+freq: # periodic actions during training
+  scalar: 1                                                # log losses and scalar states (every N iterations)
+  vis: 1                                                   # visualize results (every N iterations)
+  val: 50                                                  # validate on val set (every N iterations)
+  ckpt: 5                                                  # save checkpoint (every N iterations)\\
+
+Renderer:
+  rand_rays: 8192                                          # sample rays number for rendering
+
+
+

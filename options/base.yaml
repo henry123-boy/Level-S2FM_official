@@ -1,0 +1,33 @@
+# default
+batch_size:
+tb:
+visdom:
+group: 0_test                                               # name of experiment group
+name: debug                                                 # name of experiment run
+yaml:                                                       # config file (must be specified from command line)
+seed: 0                                                     # seed number (for both numpy and pytorch)
+gpu: 0                                                      # GPU index number
+cpu: false                                                  # run only on CPU (not supported now)
+load:                                                       # load checkpoint from filename
+pipeline:
+get_result: false
+vis_all_rgb: false
+arch: { }                                                    # architectural options
+
+data: # data options
+  root:                                                   # root path to dataset
+  dataset:                                                # dataset name
+  image_size: [ null,null ]                                 # input image sizes [height,width]
+  num_workers: 8                                          # number of parallel workers for data loading
+  preload: false                                          # preload the entire dataset into the memory
+  augment: { }                                             # data augmentation (training only)
+  center_crop:
+  init:
+  center:
+
+loss_weight: { }                                             # loss weights (in log scale)
+resume: false                                               # resume training (true for latest checkpoint, or number for specific epoch number)
+
+output_root: output                                         # root path for output files (checkpoints and results)
+
+
