@@ -83,7 +83,7 @@ class Registration():
             return False,0,len(p3d)
         print("pnp found {} 3D-2D pairs".format(len(id_3d)))
         sdfs=self.sdf_func.infer_sdf(p3d).detach().cpu()
-        if self.opt.ba_trad==False:
+        if self.opt.Ablate_config.ba_trad==False:
             mask=(sdfs<0.05).squeeze()
             p3d=p3d.detach().cpu().numpy()[mask]
             p2d=p2d.detach().cpu().numpy()[mask]
