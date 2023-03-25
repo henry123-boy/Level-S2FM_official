@@ -61,6 +61,7 @@ optim:
   algo_split: SGD
   optim_split: true
   use_grad_clip: false
+  lr_xyzs: 1.e-2
   init: # optim config for initialization
     max_iter: 500
     lr_sdf: 1.e-3

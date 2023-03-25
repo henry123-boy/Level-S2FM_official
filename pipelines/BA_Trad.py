@@ -1,18 +1,18 @@
 import copy
 import pdb
 import numpy as np
-import os, sys, time
 import torch.nn as nn
 import torch
 import tqdm
 import utils.util as util
 from utils.camera import  world2cam, cam2img
 from easydict import EasyDict as edict
-sys.path.append(os.path.join(os.path.dirname(__file__), "../external"))
 import utils.camera as camera
 from . import Camera
 from . import Point3D
 from typing import Optional
+epsilon = 1e-6
+
 class BA(nn.Module):
     def __init__(self,
                  opt,
@@ -80,9 +80,7 @@ class BA(nn.Module):
         self.kypts2D_forward = torch.cat(kypts2D_forward, dim=0)
         self.pointset=pointset
         self.cameraset=cameraset
-        #
-        if opt.fp16==True:
-            self.scaler = torch.cuda.amp.GradScaler()
+
 
     def run_ba(self,
                sdf_func,

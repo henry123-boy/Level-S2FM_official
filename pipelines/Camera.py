@@ -318,6 +318,7 @@ class Camera(nn.Module):
     def generate_videos_synthesis(self,
                                   sdf_func,
                                   color_func,
+                                  Renderer,
                                   N=60):
         opt = self.opt
         # render the novel views
@@ -332,7 +333,7 @@ class Camera(nn.Module):
         pose_novel_tqdm = tqdm.tqdm(pose_novel, desc="rendering novel views", leave=False)
         for i, pose in enumerate(pose_novel_tqdm):
             ret_render = self.render_img_by_slices(sdf_func=sdf_func, color_func=color_func,
-                                                   pose_input=pose.unsqueeze(0))
+                                                   pose_input=pose.unsqueeze(0),Renderer=Renderer)
             # img_gt
             rgb_vis = ret_render.rgb.view(self.opt.H, self.opt.W, 3)
             img_gt_vis = self.img_gt[0].detach().permute(1, 2, 0).cpu().numpy() * 255

@@ -179,7 +179,7 @@ class Registration():
         # shpere tracing 得到三维点
         center_tem = torch.cat(center_pairs, dim=1)
         ray_tem = torch.cat(ray_pairs, dim=1)
-        d_surface, sdf_surf, sample_pts, mask_finish = sdf_func.sphere_tracing(center_tem, ray_tem, sdf_func, rad=self.opt.rad)
+        d_surface, sdf_surf, sample_pts, mask_finish = sdf_func.sphere_tracing(center_tem, ray_tem, sdf_func)
         pts_surface_chunk=[self.triangulation(p[0],p[1],ky[0],ky[1],camera_new.intrinsic) for p,ky in zip(pose_pairs,kypts_pairs)]
         mask_finish_chunk=[mask_finish.view(2,-1,1)[:,a:b,:] for a,b in zip(num_ckpt[:-1],num_ckpt[1:])]
         pts_new=[]
@@ -213,7 +213,7 @@ class Registration():
                 # -------------update 2d-3d matches---------------------
                 self.CameraSet.cameras[cam_pair_i[0]].idx2d_to_3d[kypts2d_indx[0]]=pts_indx
                 self.CameraSet.cameras[cam_pair_i[1]].idx2d_to_3d[kypts2d_indx[1]] = pts_indx
-        if self.opt.ba_trad==False:
+        if self.opt.Ablate_config.ba_trad==False:
             loader = tqdm.trange(self.max_iter, desc="Initialization", leave=False)
             #-------------multi-view st consistence------------------
             if pointset is not None:

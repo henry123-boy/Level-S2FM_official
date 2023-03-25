@@ -248,7 +248,9 @@ class Model():
         pts3d_num = []
         cameras_vis = [cameraset(i) for i in filter_ids.tolist()]
         for new_camera in cameras_vis:
-            new_camera.generate_videos_synthesis(sdf_func=self.sdf_func, color_func=self.color_func, N=30)
+            new_camera.generate_videos_synthesis(sdf_func=self.sdf_func,
+                                                 color_func=self.color_func,
+                                                 N=30, Renderer=self.Renderer)
             # # visualize the novel view's rgb
             ret = new_camera.get_depth(sdf_func=self.sdf_func)
             ret_render = new_camera.render_img_by_slices(sdf_func=self.sdf_func,
