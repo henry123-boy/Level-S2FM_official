@@ -76,7 +76,8 @@ class BA(nn.Module):
             self.pose_idx=np.array(pose_idx)
             self.pts_pick_ids = np.concatenate(pts_pick_ids, axis=0)
             self.ba_name = "global_ba"
-        _,_,self.rgbs_gt,self.dps_omn,self.norms_omn=cameraset.get_ren_data(sdf_func=sdf_func,color_func=color_func,cam_ids=self.cam_pick_ids,dp_req=True)
+        _, _, self.rgbs_gt = cameraset.get_ren_data(sdf_func=sdf_func, color_func=color_func, cam_ids=self.cam_pick_ids,
+                                                    dp_req=True)
         self.kypts2D_forward = torch.cat(kypts2D_forward, dim=0)
         self.pointset=pointset
         self.cameraset=cameraset
@@ -84,7 +85,8 @@ class BA(nn.Module):
 
     def run_ba(self,
                sdf_func,
-               color_func):
+               color_func,
+               Renderer):
         loader = tqdm.trange(self.max_iter,desc=self.ba_name,leave=False)
         for it in loader:
             self.xyzs_all = self.xyzs_paras()
