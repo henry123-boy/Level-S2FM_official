@@ -128,10 +128,11 @@ class Initializer():
         self.sched = sched(self.optim, gamma=(lr_sdf_end / lr_sdf) ** (1. / max_iter))
 
     @torch.no_grad()
-    def print_loss(self, loss_dict):
-        loss_dict_reduced = {}
+    def print_loss(self, loss_dict, PSNR):
+        loss_dict_reduced = {'PSNR': PSNR.item()}
         for key in loss_dict.keys():
             loss_dict_reduced[key] = loss_dict[key].item()
+
         print(loss_dict_reduced)
 
     def run(self,
@@ -168,8 +169,9 @@ class Initializer():
                              ret=ret, Renderer=Renderer)
 
             loss = self.compute_loss(ret)
-            # print(loss)
-            self.print_loss(loss_dict=loss) #TODO: suppress the print
+            
+            if it%10==0: #TODO: add an option to control the frequency of printing
+                self.print_loss(loss_dict=loss,PSNR=ret.get('PSNR'))
             loss = self.summarize_loss(self.opt, loss)
             loss.all.backward()
 
@@ -177,7 +179,7 @@ class Initializer():
             self.sched.step()
         print("----------------final loss-----------------")
         # print(loss)
-        self.print_loss(loss_dict=loss)
+        self.print_loss(loss_dict=loss, PSNR=ret.get('PSNR'))
 
         # ------------update feat tracks&Point3D---------------------
         with torch.no_grad():

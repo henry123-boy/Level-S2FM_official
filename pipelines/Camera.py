@@ -534,9 +534,11 @@ class CameraSet():
                         reduce=False)).mean()
             else:
                 d_consistent = torch.zeros_like(d_points).mean()
-            print(f"PSNR:{-10 * torch_F.mse_loss(rgb[mask_bg], rgbs_gt[mask_bg]).log10()}")
+            # print(f"PSNR:{-10 * torch_F.mse_loss(rgb[mask_bg], rgbs_gt[mask_bg]).log10()}")
+            PSNR = -10 * torch_F.mse_loss(rgb[mask_bg], rgbs_gt[mask_bg]).log10()
             ret.update(edict(tracing_loss=tracing_loss, mask_bg=mask_bg,
-                             rgb_loss=torch_F.l1_loss(rgb, rgbs_gt), DC_loss=d_consistent))  # [B,HW,K]
+                             rgb_loss=torch_F.l1_loss(rgb, rgbs_gt), DC_loss=d_consistent,
+                             PSNR=PSNR))  # [B,HW,K]
         return ret
 
     def get_all_poses(self, pick_cam_id=None):
