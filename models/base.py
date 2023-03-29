@@ -189,7 +189,7 @@ class Geometry(nn.Module):
                     torch.nn.init.constant_(linear.bias, 0.0)
                     torch.nn.init.constant_(linear.weight[:, 3:], 0.0)
                     torch.nn.init.normal_(linear.weight[:, :3], 0.0, np.sqrt(2) / np.sqrt(k_out))
-                elif li in opt.skip:
+                elif li in opt.SDF.arch.skip:
                     torch.nn.init.constant_(linear.bias, 0.0)
                     torch.nn.init.normal_(linear.weight, 0.0, np.sqrt(2) / np.sqrt(k_out))
                     torch.nn.init.constant_(linear.weight[:, -(input_dim - 3):],
