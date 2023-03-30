@@ -18,7 +18,7 @@
 
 ## TL;DR: 
 
-Level-S<sup>2</sup>fM presents an incremental neural Structure from Motion(SfM) pipeline based on the neural level-sets representation. It leverages the 2D image matches and neural rendering to drive the joint optimization of **Camera Poses**,  **SDF** and **Radiance Field**. 
+Level-S<sup>2</sup>fM presents an incremental neural Structure from Motion(SfM) pipeline based on the neural level-sets representation. It leverages the 2D image matches and neural rendering to drive the joint optimization of **Camera Poses**,  **SDF** and **Radiance Fields**. 
 
 ### Set up a conda environment, and install [CUDA Extension](https://github.com/kwea123/ngp_pl):
 ```
@@ -89,9 +89,9 @@ Coming with instrcution.
 
 ## Comments
 
-Our Level-S<sup>2</sup> fM provides a new perspective to revisit the traditional sparse 3D reconstruction (SfM) with **Neural Field Representation** and **Neural Rendering**. This work may contribute to let you see the capability of a simple **coordinate MLP** in SfM. However, It's not going to be very mature system yet like  [COLMAP](https://github.com/colmap/colmap), and we are continuing to refine it in the future.
+Our Level-S<sup>2</sup>fM provides a new perspective to revisit the traditional sparse 3D reconstruction (SfM) with **Neural Field Representation** and **Neural Rendering**. This work may contribute to let you see the capability of a simple **coordinate MLP** in SfM. However, It's not going to be very mature system yet like  [COLMAP](https://github.com/colmap/colmap), and we are continuing to refine it in the future.
 
-## Acknowledgement
+## Acknowledgements
 
 - Thanks to Johannes Schönberger for his excellent work [COLMAP](https://github.com/colmap/colmap).
 - Thanks to Thomas Müller for his excellent work [tiny-cuda-nn](https://github.com/NVlabs/tiny-cuda-nn) and  [Instant NGP](https://github.com/NVlabs/instant-ngp) 
