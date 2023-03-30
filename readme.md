@@ -45,7 +45,7 @@ conda activate levels2fm
 
 ## Prepare Data
 
-In our default setting, Level-S<sup>2</sup> fM depends on the 2D image Matches by SIFT. To leverage existing solutions and avoid redundancy, we directly uses the SIFT matches and pose graph from COLMAP.  We provide our [processed data](https://henry123-boy.github.io/level-s2fm/) in Google Drive. Please download and `unzip` them into the folder `./data` for runing.  
+In our default setting, Level-S<sup>2</sup> fM depends on the 2D image Matches by SIFT. To leverage existing solutions and avoid redundancy, we directly uses the SIFT matches and pose graph from COLMAP.  We provide our [processed data](https://drive.google.com/file/d/13Ap_UA244OdqPwYlvSpMUcKt3CzrTKfS/view?usp=sharing) in Google Drive. Please download and `unzip` them into the folder `./data` for runing.  
 
 
 ## Reconstruction with Level-S<sup>2</sup>fM 
