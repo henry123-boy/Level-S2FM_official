@@ -11,7 +11,7 @@ else
 fi
 unset __conda_setup
 cd ..
-conda activate ngp_pl
+conda activate levels2fm
 
 python train.py --group=ETH3D --pipeline=LevelS2fM --yaml=ETH3D --name=relief --data.dataset=ETH3D --data.scene=relief   --sfm_mode=full --nbv_mode=ours --refine_again=false
 
