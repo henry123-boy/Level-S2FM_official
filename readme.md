@@ -88,6 +88,14 @@ CUDA_VISIBLE_DEVICES=<GPU> sh train_ETH3D.sh
 
 
 
+## Acknowledgement
+
+- Thanks to Johannes Schönberger for his excellent work [COLMAP](https://github.com/colmap/colmap).
+- Thanks to Thomas Müller for his excellent work [tiny-cuda-nn](https://github.com/NVlabs/tiny-cuda-nn) and  [Instant NGP](https://github.com/NVlabs/instant-ngp) 
+- Thanks to Lior Yariv for her excellent work [VolSDF](https://lioryariv.github.io/volsdf/).
+- Thanks to AI Aoi for his excellent implementation of [Instant NGP](https://github.com/NVlabs/instant-ngp) by pytorch [ngp_pl](https://github.com/kwea123/ngp_pl).
+- Thanks to [Sida Peng](https://pengsida.net/) for his valuable suggestions and discussions for our Level-S<sup>2</sup> fM
+
 ## BibTeX
 
 ```
