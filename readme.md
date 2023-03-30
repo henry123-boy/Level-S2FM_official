@@ -66,7 +66,13 @@ Trying our Level-S<sup>2</sup> fM with the traditional Bundle Adjustment:
 python train.py --group=<group_name_exp> --pipeline=LevelS2fM --yaml=<config file> --name=<exp_name> --data.dataset=<dataset> --data.scene=<scene_name>   --sfm_mode=full --nbv_mode=ours --Ablate_config.dual_field=true --Ablate_config.tri_trad=true --Ablate_config.ba_trad=true
 ```
 
+#### Running with provided Scripts
 
+`cd` into `./scripts`, and run the script file like:
+
+```sh
+CUDA_VISIBLE_DEVICES=<GPU> sh train_ETH3D.sh
+```
 
 ## Creating your own dataset
 
