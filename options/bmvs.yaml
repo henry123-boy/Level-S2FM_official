@@ -1,0 +1,45 @@
+_parent_: options/LevelS2fM.yaml
+
+MAX_SAMPLES: 100
+
+SDF:
+  NN_Init:
+    bias: 0.5                                              # define the init sphere
+    scale_mlp: 1                                           # to scale up/down the init sdf value
+
+data:
+  inside: true
+  image_size: [ 576, 768 ]
+  bound_max: [ 2, 2, 2]
+  bound_min: [ -2,-2,-2]
+  bgcolor: [1,1,1]
+  Character:
+    scale_init: 1
+    rad_init: 5
+  Fountain:
+    scale_init: 0.5
+    rad_init: 2
+  Statues:
+    scale_init: 1
+    rad_init: 3
+  Church:
+    scale_init: 0.5
+    rad_init: 2
+  Jade:
+    scale_init: 3
+    rad_init: 6
+  Horse:
+    scale_init: 0.5
+    rad_init: 2
+  LyingStatue:
+    scale_init: 1
+    rad_init: 3.75
+  Stone:
+    scale_init: 1.2
+    rad_init: 3.75
+  StoneBell:
+    scale_init: 1.2
+    rad_init: 3.75
+
+
+

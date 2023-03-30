@@ -1,0 +1,36 @@
+_parent_: options/LevelS2fM.yaml
+SDF:
+  NN_Init:
+    bias: 2.5                                               # define the init sphere
+    scale_mlp: 5                                           # to scale up/down the init sdf value
+
+data:
+  inside: false
+  image_size: [ 1033,1551 ]
+  bound_max: [ 5., 5., 5. ]
+  bound_min: [ -5.,-5.,-5. ]
+  bgcolor: [0,0,0]
+  courtyard:
+    scale_init: 0.4
+    rad_init: 0
+  relief:
+    scale_init: 0.4
+    rad_init: 0
+  terrace:
+    scale_init: 0.3
+    rad_init: 0
+  relief_2:
+    scale_init: 0.2
+    rad_init: 0
+  facade:
+    scale_init: 0.4
+    rad_init: 0
+  door:
+    scale_init: 0.5
+    rad_init: 0
+  observatory:
+    scale_init: 0.5
+    rad_init: 0
+  terrace_2:
+    scale_init: 0.4
+    rad_init: 0
