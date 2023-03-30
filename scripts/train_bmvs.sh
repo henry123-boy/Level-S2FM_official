@@ -11,7 +11,7 @@ else
 fi
 unset __conda_setup
 cd ..
-conda activate ngp_pl
+conda activate levels2fm
 
 
 
