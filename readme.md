@@ -54,6 +54,18 @@ python train.py --group=<group_name_exp> --pipeline=LevelS2fM --yaml=<config fil
 ```
 #### Running with Some Ablations 
 
+Trying our Level-S<sup>2</sup> fM with the traditional triangulation:
+
+```bash
+python train.py --group=<group_name_exp> --pipeline=LevelS2fM --yaml=<config file> --name=<exp_name> --data.dataset=<dataset> --data.scene=<scene_name>   --sfm_mode=full --nbv_mode=ours --Ablate_config.dual_field=true --Ablate_config.tri_trad=true
+```
+
+Trying our Level-S<sup>2</sup> fM with the traditional Bundle Adjustment:
+
+```bash
+python train.py --group=<group_name_exp> --pipeline=LevelS2fM --yaml=<config file> --name=<exp_name> --data.dataset=<dataset> --data.scene=<scene_name>   --sfm_mode=full --nbv_mode=ours --Ablate_config.dual_field=true --Ablate_config.tri_trad=true --Ablate_config.ba_trad=true
+```
+
 
 
 ## Creating your own dataset
@@ -73,10 +85,11 @@ python train.py --group=<group_name_exp> --pipeline=LevelS2fM --yaml=<config fil
 ## BibTeX
 
 ```
-@article{xiao2022level,
-      title={Level-S $\^{} 2$ fM: Structure from Motion on Neural Level Set of Implicit Surfaces},
-      author={Xiao, Yuxi and Xue, Nan and Wu, Tianfu and Xia, Gui-Song},
-      journal={arXiv preprint arXiv:2211.12018},
-      year={2022}
-    }
+@inproceedings{xiao2022level,
+  title     = {Level-S\({}^{\mbox{2}}\)fM: Structure from Motion on Neural Level
+               Set of Implicit Surfaces},
+  author={Yuxi Xiao and Nan Xue and Tianfu Wu and Gui-Song Xia},
+  booktitle={IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  year={2023}
+}
 ```
