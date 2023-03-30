@@ -1,4 +1,9 @@
+##### 🔥 News
+
+- `30/03/2022` :wink: Code of Level-S<sup>2</sup> fM Release
+
 # Level-S<sup>2</sup>fM: Structure from Motion on Neural Level Set of Implicit Surfaces
+
 ### [Project Page](https://henry123-boy.github.io/level-s2fm/) | [Paper](https://arxiv.org/pdf/2211.12018.pdf) | [Data](https://henry123-boy.github.io/level-s2fm/)
 
 
@@ -76,17 +81,15 @@ CUDA_VISIBLE_DEVICES=<GPU> sh train_ETH3D.sh
 
 ## Creating your own dataset
 
-
-
-## Evaluation
+A complete Instruction is coming soon! 
 
 ## Tips
 
-
+Coming with instrcution.
 
 ## Comments
 
-
+Our Level-S<sup>2</sup> fM provide a new perspective to revisit the traditional sparse reconstruction (SfM) with **Neural Field Representation** and **Neural Rendering**. This work may contribute to let you see the capability of a simple **coordinate MLP** in SfM. However, It's not going to be very mature system yet like  [COLMAP](https://github.com/colmap/colmap), and we are continuing to refine it in the future.
 
 ## Acknowledgement
 
