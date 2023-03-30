@@ -1,0 +1,31 @@
+_parent_: options/LevelS2fM.yaml
+
+SDF:
+  NN_Init:
+    bias: 2                                                # define the init sphere
+    scale_mlp: 1                                           # to scale up/down the init sdf value
+  VolSDF:
+    iters_max_st: 10                                       # max iteration number of sphere tracing
+
+data:
+  bias: 2
+  inside: false
+  bound_max: [ 4,4,4 ]
+  bound_min: [ -4,-4,-4 ]
+  image_size: [ 333,443 ]
+  bgcolor: [0,0,0]
+  scene0169_00:
+    scale_init: 0.25
+    rad_init: 10
+  scene0207_00:
+    scale_init: 0.05
+    rad_init: 2
+  scene0089_00:
+    scale_init: 0.05
+    rad_init: 2
+  scene0000_00:
+    scale_init: 1.5
+    rad_init: 10
+  scene0059_00:
+    scale_init: 1.5
+    rad_init: 10
