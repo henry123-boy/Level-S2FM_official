@@ -45,11 +45,16 @@ In our default setting, Level-S<sup>2</sup> fM depends on the 2D image Matches b
 
 ## Reconstruction with Level-S<sup>2</sup>fM 
 
-#### Running Default Version
+#### Running Default Version 
+
+In our default version, our Level-S<sup>2</sup> fM uses the **SDF-based Triangulation** and **Neural Bundle Adjustment**, where the SDF plays as a top-down regularization to manage the sparse pointset with feature track and filter the outliers.
 
 ```bash
 python train.py --group=<group_name_exp> --pipeline=LevelS2fM --yaml=<config file> --name=<exp_name> --data.dataset=<dataset> --data.scene=<scene_name>   --sfm_mode=full --nbv_mode=ours --Ablate_config.dual_field=true                          
 ```
+#### Running with Some Ablations 
+
+
 
 ## Creating your own dataset
 
