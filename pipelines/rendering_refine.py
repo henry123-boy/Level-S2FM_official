@@ -60,6 +60,15 @@ class Refine(nn.Module):
         self.pointset=pointset
         self.cameraset=cameraset
 
+    @torch.no_grad()
+    def print_loss(self, loss_dict, PSNR = None):
+        if PSNR is not None:
+            loss_dict_reduced = {'PSNR': PSNR.item()}
+        for key in loss_dict.keys():
+            loss_dict_reduced[key] = loss_dict[key].item()
+
+        print(loss_dict_reduced)
+
     def run(self,
                sdf_func,
                color_func,
@@ -79,7 +88,8 @@ class Refine(nn.Module):
                              Renderer=Renderer,
                              pointset=self.pointset)
             loss = self.compute_loss(ret)
-            print(loss)
+            if it%10 == 0 or it == len(loader)-1:
+                self.print_loss(loss, PSNR=ret.get('PSNR',None))
             loss = self.summarize_loss(self.opt, loss)
             loss.all.backward()
             self.optim.step()

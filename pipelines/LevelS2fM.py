@@ -20,7 +20,15 @@ from . import Initialization_Trad
 from . import BA_Trad
 from . import Registration_Trad
 
-
+@torch.no_grad()
+def slerp(pose0, pose1, t):
+    import pyquaternion
+    quat0 = pyquaternion.Quaternion._from_matrix(matrix=pose0[:3,:3].cpu().numpy(),rtol=1e-5, atol=1e-5)
+    quat1 = pyquaternion.Quaternion._from_matrix(matrix=pose1[:3,:3].cpu().numpy(),rtol=1e-5, atol=1e-5)
+    quatt = pyquaternion.Quaternion.slerp(quat0, quat1, t)
+    R = torch.tensor(quatt.rotation_matrix,dtype=pose0.dtype,device=pose0.device)
+    T = (1 - t) * pose0[:3,3] + t * pose1[:3,3]
+    return torch.cat([R, T[None,:].T], dim=1)
 class Model(base.Model):
 
     def __init__(self, opt):
@@ -112,8 +120,27 @@ class Model(base.Model):
                 self.point_set.add_point3d(xyz=xyz_i,
                                            feat_tracks=feat_track_i)
         load_finish = False
+
+        random_view = None
+
+        rendered_rgb_list = []
         for self.it in loader:
             var.iter = self.it
+            if random_view is not None:
+                rendered_output = self.camera_set.cameras[0].render_img_by_slices(
+                    self.sdf_func,
+                    self.color_func,
+                    self.Renderer,
+                    random_view
+                )
+                rendered_rgb = rendered_output['rgb'][0].reshape(*opt.data.image_size,3).cpu().numpy()
+
+                rendered_rgb_list.append(rendered_rgb)
+                # import matplotlib.pyplot as plt 
+                # for rgb_ in rendered_rgb_list:
+                #     plt.imshow(rgb_)
+                #     plt.show()
+                # import pdb; pdb.set_trace()
             if len(self.camera_set) < 2:
                 # Initialization
                 if opt.resume == False:
@@ -147,13 +174,14 @@ class Model(base.Model):
                 #     show_progress=True,
                 #     extra_info=self.sdf_func,
                 #     N=512)
-
                 if opt.resume == False:
                     Initializer.run(self.camera_set, self.point_set,
                                     self.sdf_func, self.color_func, Renderer=self.Renderer)
                     self.save_checkpoint(opt, ep=None, it=self.it + 1, latest=False)
                     self.vis_geo_rgb(opt, cameraset=self.camera_set, new_camera=self.camera_set.cameras[0],
                                      pointset=self.point_set, vis_only=True, cam_only=False)
+
+                random_view = slerp(self.camera_set.cameras[0].get_pose()[0], self.camera_set.cameras[1].get_pose()[0], 0.5)                                
                 del Initializer
             else:
                 if (opt.resume == True) & (load_finish == False):
