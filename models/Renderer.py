@@ -175,7 +175,7 @@ class Renderer(nn.Module):
         :param ray:      [B,HW,3]        the ray
         :return:
         '''
-        _, hits_t, _ = RayAABBIntersector.apply(center.view(-1, 3), ray.view(-1, 3), self.center.squeeze(0),
+        _, hits_t, _ = RayAABBIntersector.apply(center.reshape(-1, 3), ray.reshape(-1, 3), self.center.squeeze(0),
                                                 self.half_size.squeeze(0), 1)
         d_min_max = hits_t.squeeze(-1).view([*center.shape[:2], -1])  # get the min&max by intersect
         batch_size = center.shape[0]
