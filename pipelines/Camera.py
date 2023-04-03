@@ -86,11 +86,6 @@ class Camera(nn.Module):
         self.mch_msks = Match_mask
         self.inlier_msks = Inlier_mask
         self.idx2d_to_3d = idx2d_to_3d if idx2d_to_3d is not None else -1 * np.ones(self.kypts.shape[0]).astype(int)
-        self.depth_omn = util.pad_omn2org(Depth_omn.unsqueeze(0).unsqueeze(0), img_gt, mode="depth").squeeze(1)
-        self.normal_omn = util.pad_omn2org(Normal_omn.permute(2, 0, 1).unsqueeze(0), img_gt, mode="normal").permute(0,
-                                                                                                                    2,
-                                                                                                                    3,
-                                                                                                                    1)
         self.mesh_grid = camera.mesh_grid(opt)
         self.pose_gt = pose_gt
         # #----------- init_with gt------------------
