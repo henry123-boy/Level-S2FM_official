@@ -31,7 +31,7 @@ class Dataset(base.Dataset):
             root_data="{0}/{1}".format(self.path,opt.data.scene)
         else:
             root_data = self.path
-        self.path_image = "{}/image".format(root_data)
+        self.path_image = "{}/images".format(root_data)
         self.path_cam = '{}/cameras.npz'.format(root_data)
         image_fnames = sorted(os.listdir(self.path_image))
         image_fnames=[os.path.join(self.path_image,img_f_i) for img_f_i in  image_fnames]
@@ -67,9 +67,6 @@ class Dataset(base.Dataset):
             self.c2w_all.append(torch.from_numpy(pose[:3]).float())
 
         self.rgb_images = []
-        self.depth_gt=[]
-        self.norm_omnidata=[]
-        self.depth_omnidata=[]
         self.list = image_fnames
         image_fnames = image_fnames
         self.n_images =len(image_fnames)
@@ -80,12 +77,6 @@ class Dataset(base.Dataset):
         for path in tqdm(image_fnames, desc='loading images...'):
             rgb = self.load_rgb(path, downscale)
             imgname=path.split("/")[-1]
-            depth = np.load(f'{root_data}/omnidata_depth/{imgname[:-4]}_depth.npy') / 1000
-            self.depth_gt.append(depth)
-            norm_ = np.load(f'{root_data}/omnidata_norm/{imgname[:-4]}_normal.npy')
-            depth_ = np.load(f'{root_data}/omnidata_depth/{imgname[:-4]}_depth.npy')
-            self.norm_omnidata.append(norm_)
-            self.depth_omnidata.append(depth_.squeeze(0))
             rgb_tensor=torch.from_numpy(rgb).float()
             # rgb_tensor[:,torch.all(rgb_tensor <= 0.1, dim=0)] = 1.0
             self.rgb_images.append(rgb_tensor)
@@ -153,16 +144,10 @@ class Dataset(base.Dataset):
         sample = dict(idx=idx)
         image = self.rgb_images[idx]
         intr, pose = self.intrinsics_all[idx][:3,:3], camera.pose.invert(self.c2w_all[idx][:3,:])
-        depth_gt = self.depth_gt[idx]
-        norm_omnidata = self.norm_omnidata[idx]
-        depth_omnidata = self.depth_omnidata[idx]
         sample.update(
             image=image,
             intr=intr,
-            pose=pose,
-            depth_gt=depth_gt,
-            norm_omnidata=norm_omnidata,
-            depth_omnidata=depth_omnidata
+            pose=pose
         )
         return sample
 

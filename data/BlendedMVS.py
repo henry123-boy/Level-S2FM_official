@@ -71,12 +71,6 @@ class Dataset(base.Dataset):
             rgb = cv2.imread(f'{image_dir}/{imgname[:-4]}.png')
             rgb = cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB)
             rgb = (rgb.astype(np.float32) / 255).transpose(2, 0, 1)
-            depth = np.load(f'{self.root}/omnidata_depth/{imgname[:-4]}_depth.npy') / 1000
-            self.depth_gt.append(depth)
-            norm_=np.load(f'{self.root}/omnidata_norm/{imgname[:-4]}_normal.npy')
-            depth_=np.load(f'{self.root}/omnidata_depth/{imgname[:-4]}_depth.npy')
-            self.norm_omnidata.append(norm_)
-            self.depth_omnidata.append(depth_.squeeze(0))
             _, self.H, self.W = rgb.shape
             # rgb = rgb.reshape(3, -1).transpose(1, 0)
             rgb_tensor=torch_F.interpolate(torch.from_numpy(rgb).float().unsqueeze(0),size=[height_,width_]).squeeze(0)
@@ -119,17 +113,10 @@ class Dataset(base.Dataset):
         sample = dict(idx=idx)
         image = self.rgb_images[idx]
         intr, pose = self.intrinsics_all[idx][:3,:3],camera.pose.invert(self.c2w_all[idx][:3,:])
-        depth_gt=self.depth_gt[idx]
-        norm_omnidata=self.norm_omnidata[idx]
-        depth_omnidata=self.depth_omnidata[idx]
-        #intr, pose = self.intrinsics_all[idx][:3,:3],camera.pose.invert(self.c2w_all[idx][:3,:])
         sample.update(
             image=image,
             intr=intr,
             pose=pose,
-            depth_gt=depth_gt,
-            norm_omnidata=norm_omnidata,
-            depth_omnidata=depth_omnidata,
             img_name=self.img_names[idx]
         )
         return sample

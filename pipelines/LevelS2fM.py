@@ -153,8 +153,6 @@ class Model(base.Model):
                 var.mchs_init = [var.matches[i] for i in var.indx_init]
                 var.inliers_init = [var.masks[i] for i in var.indx_init]
                 var.gt_depths = None
-                var.omn_depths = self.train_data.all.depth_omnidata[var.indx_init]
-                var.omn_norms = self.train_data.all.norm_omnidata[var.indx_init]
 
                 if opt.Ablate_config.tri_trad == True:
                     Initializer = Initialization_Trad.Initializer(opt, self.camera_set, self.point_set,
