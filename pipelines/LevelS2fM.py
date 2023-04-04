@@ -196,8 +196,8 @@ class Model(base.Model):
                                                    Match_mask=var.matches[new_id],
                                                    Inlier_mask=var.masks[new_id],
                                                    Intrinsic=self.train_data.all.intr[new_id],
-                                                   Depth_omn=self.train_data.all.depth_omnidata[new_id],
-                                                   Normal_omn=self.train_data.all.norm_omnidata[new_id],
+                                                   Depth_omn=None,
+                                                   Normal_omn=None,
                                                    Extrinsic=self.cam_info_reloaded["pose_para"][
                                                              idx_reload:idx_reload + 1],
                                                    idx2d_to_3d=self.cam_info_reloaded["idx2d_to_3ds"][idx_reload])
@@ -258,8 +258,8 @@ class Model(base.Model):
                                                    Match_mask=var.matches[new_id],
                                                    Inlier_mask=var.masks[new_id],
                                                    Intrinsic=self.train_data.all.intr[new_id],
-                                                   Depth_omn=self.train_data.all.depth_omnidata[new_id],
-                                                   Normal_omn=self.train_data.all.norm_omnidata[new_id],
+                                                   Depth_omn=None,
+                                                   Normal_omn=None,
                                                    Extrinsic=None,
                                                    idx2d_to_3d=None)
                         Register = Registration.Registration(opt, self.sdf_func, cameraset=self.camera_set)
@@ -289,8 +289,8 @@ class Model(base.Model):
                                            Match_mask=var.matches[new_id],
                                            Inlier_mask=var.masks[new_id],
                                            Intrinsic=self.train_data.all.intr[new_id],
-                                           Depth_omn=self.train_data.all.depth_omnidata[new_id],
-                                           Normal_omn=self.train_data.all.norm_omnidata[new_id],
+                                           Depth_omn=None,
+                                           Normal_omn=None,
                                            Extrinsic=None,
                                            idx2d_to_3d=None)
                 print(f"Total cameras num:{len(self.camera_set.cam_ids)}")

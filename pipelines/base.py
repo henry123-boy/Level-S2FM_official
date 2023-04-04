@@ -202,14 +202,11 @@ class Model():
         save_path = opt.output_path + "/image/{}".format(new_camera.id)
         os.makedirs(opt.output_path + "/image/{}".format(new_camera.id), exist_ok=True)
         norm_vis = (ret.norms + 1) / 2
-        norm_vis_omn = (new_camera.normal_omn + 1) / 2
         norm_vis_mlp = (ret_render.norm.view(opt.H, opt.W, 3) + 1) / 2
         rgb_vis = ret_render.rgb.view(opt.H, opt.W, 3)
         # depth
         plt.imsave(save_path + "/dp.jpg",
                    ret.depth.view(int(opt.H // 4), int(opt.W // 4), 1).detach().cpu().squeeze(), cmap='viridis')
-        plt.imsave(save_path + "/dp_omn.jpg",
-                   new_camera.depth_omn.permute(1, 2, 0).detach().cpu().squeeze(), cmap='viridis')
         plt.imsave(save_path + "/dp_render.jpg", ret_render.depth.view(opt.H, opt.W, 1).detach().cpu().squeeze(),
                    cmap='viridis')
         # img_gt
@@ -221,8 +218,6 @@ class Model():
         # norm_vis
         cv2.imwrite(save_path + "/norm.jpg",
                     cv2.cvtColor(norm_vis[0].detach().cpu().numpy() * 255, cv2.COLOR_RGB2BGR))
-        cv2.imwrite(save_path + "/norm_omn.jpg",
-                    cv2.cvtColor(norm_vis_omn[0].detach().cpu().numpy() * 255, cv2.COLOR_RGB2BGR))
         cv2.imwrite(save_path + "/norm_mlp.jpg",
                     cv2.cvtColor(norm_vis_mlp.detach().cpu().numpy() * 255, cv2.COLOR_RGB2BGR))
 
@@ -257,14 +252,11 @@ class Model():
                                                          color_func=self.color_func,
                                                          Renderer=self.Render)
             norm_vis = (ret.norms + 1) / 2
-            norm_vis_omn = (new_camera.normal_omn + 1) / 2
             norm_vis_mlp = (ret_render.norm.view(opt.H, opt.W, 3) + 1) / 2
             rgb_vis = ret_render.rgb.view(opt.H, opt.W, 3)
             # depth
             plt.imsave(save_path + "/dp_{}.jpg".format(new_camera.id),
                        ret.depth.view(opt.H, opt.W, 1).detach().cpu().squeeze(), cmap='viridis')
-            plt.imsave(save_path + "/dp_omn_{}.jpg".format(new_camera.id),
-                       new_camera.depth_omn.permute(1, 2, 0).detach().cpu().squeeze(), cmap='viridis')
             plt.imsave(save_path + "/dp_render_{}.jpg".format(new_camera.id),
                        ret_render.depth.view(opt.H, opt.W, 1).detach().cpu().squeeze(), cmap='viridis')
             # img_gt
@@ -285,8 +277,6 @@ class Model():
             # norm_vis
             cv2.imwrite(save_path + "/norm_{}.jpg".format(new_camera.id),
                         cv2.cvtColor(norm_vis[0].detach().cpu().numpy() * 255, cv2.COLOR_RGB2BGR))
-            cv2.imwrite(save_path + "/norm_omn_{}.jpg".format(new_camera.id),
-                        cv2.cvtColor(norm_vis_omn[0].detach().cpu().numpy() * 255, cv2.COLOR_RGB2BGR))
             cv2.imwrite(save_path + "/norm_mlp_{}.jpg".format(new_camera.id),
                         cv2.cvtColor(norm_vis_mlp.detach().cpu().numpy() * 255, cv2.COLOR_RGB2BGR))
 
