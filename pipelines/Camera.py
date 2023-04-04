@@ -292,7 +292,8 @@ class Camera(nn.Module):
         for i in tqdm.tqdm(range(int(center.shape[1] / ray_bat) + 1)):
             start = i * ray_bat
             end = (i + 1) * ray_bat if (i + 1) * ray_bat < center.shape[1] else center.shape[1]
-
+            if start==end:
+                continue
             ret_out = Renderer.forward(opt=self.opt, center=center[:, start:end, :],
                                        ray=ray[:, start:end, :], SDF_Field=sdf_func, Rad_Field=color_func)
 
