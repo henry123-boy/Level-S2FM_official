@@ -15,16 +15,16 @@ conda activate levels2fm
 
 
 
-python train.py --group=DTU --pipeline=LevelS2fM --yaml=DTU --name=65_dual --data.dataset=DTU --data.scene=scan65   --sfm_mode=full --nbv_mode=ours --Ablate_config.dual_field=true
+python train.py --group=DTU --pipeline=LevelS2fM --yaml=DTU --name=65_dual --data.dataset=DTU --data.scene=scan65   --sfm_mode=full  --Ablate_config.dual_field=true
 
-python train.py --group=DTU --pipeline=LevelS2fM --yaml=DTU --name=110 --data.dataset=DTU --data.scene=scan110   --sfm_mode=full --nbv_mode=ours --refine_again=false
+python train.py --group=DTU --pipeline=LevelS2fM --yaml=DTU --name=110 --data.dataset=DTU --data.scene=scan110   --sfm_mode=full --refine_again=false
 
-python train.py --group=DTU --pipeline=LevelS2fM --yaml=DTU --name=114 --data.dataset=DTU --data.scene=scan114   --sfm_mode=full --nbv_mode=ours --refine_again=false
+python train.py --group=DTU --pipeline=LevelS2fM --yaml=DTU --name=114 --data.dataset=DTU --data.scene=scan114   --sfm_mode=full --refine_again=false
 
 
-python train.py --group=DTU --pipeline=LevelS2fM --yaml=DTU --name=24 --data.dataset=DTU --data.scene=scan24   --sfm_mode=full --nbv_mode=ours  --refine_again=false
+python train.py --group=DTU --pipeline=LevelS2fM --yaml=DTU --name=24 --data.dataset=DTU --data.scene=scan24   --sfm_mode=full  --refine_again=false
 
-python train.py --group=DTU --pipeline=LevelS2fM --yaml=DTU --name=37 --data.dataset=DTU --data.scene=scan37   --sfm_mode=full --nbv_mode=ours --refine_again=false
+python train.py --group=DTU --pipeline=LevelS2fM --yaml=DTU --name=37 --data.dataset=DTU --data.scene=scan37   --sfm_mode=full --refine_again=false
 
 
 

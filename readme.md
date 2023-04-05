@@ -4,7 +4,7 @@
 
 # Level-S<sup>2</sup>fM: Structure from Motion on Neural Level Set of Implicit Surfaces
 
-### [Project Page](https://henry123-boy.github.io/level-s2fm/) | [Paper](https://arxiv.org/pdf/2211.12018.pdf) | [Data](https://henry123-boy.github.io/level-s2fm/)
+### [Project Page](https://henry123-boy.github.io/level-s2fm/) | [Paper](https://arxiv.org/pdf/2211.12018.pdf) | [Data](https://drive.google.com/file/d/13Ap_UA244OdqPwYlvSpMUcKt3CzrTKfS/view?usp=sharing) 
 
 
 
@@ -55,20 +55,20 @@ In our default setting, Level-S<sup>2</sup> fM depends on the 2D image Matches b
 In our default version, our Level-S<sup>2</sup> fM uses the **SDF-based Triangulation** and **Neural Bundle Adjustment**, where the SDF plays as a top-down regularization to manage the sparse pointset with feature track and filter the outliers.
 
 ```bash
-python train.py --group=<group_name_exp> --pipeline=LevelS2fM --yaml=<config file> --name=<exp_name> --data.dataset=<dataset> --data.scene=<scene_name>   --sfm_mode=full --nbv_mode=ours --Ablate_config.dual_field=true                          
+python train.py --group=<group_name_exp> --pipeline=LevelS2fM --yaml=<config file> --name=<exp_name> --data.dataset=<dataset> --data.scene=<scene_name>   --sfm_mode=full --Ablate_config.dual_field=true                          
 ```
 #### Running with Some Ablations 
 
 Trying our Level-S<sup>2</sup> fM with the traditional triangulation:
 
 ```bash
-python train.py --group=<group_name_exp> --pipeline=LevelS2fM --yaml=<config file> --name=<exp_name> --data.dataset=<dataset> --data.scene=<scene_name>   --sfm_mode=full --nbv_mode=ours --Ablate_config.dual_field=true --Ablate_config.tri_trad=true
+python train.py --group=<group_name_exp> --pipeline=LevelS2fM --yaml=<config file> --name=<exp_name> --data.dataset=<dataset> --data.scene=<scene_name>   --sfm_mode=full --Ablate_config.dual_field=true --Ablate_config.tri_trad=true
 ```
 
 Trying our Level-S<sup>2</sup> fM with the traditional Bundle Adjustment:
 
 ```bash
-python train.py --group=<group_name_exp> --pipeline=LevelS2fM --yaml=<config file> --name=<exp_name> --data.dataset=<dataset> --data.scene=<scene_name>   --sfm_mode=full --nbv_mode=ours --Ablate_config.dual_field=true --Ablate_config.tri_trad=true --Ablate_config.ba_trad=true
+python train.py --group=<group_name_exp> --pipeline=LevelS2fM --yaml=<config file> --name=<exp_name> --data.dataset=<dataset> --data.scene=<scene_name>   --sfm_mode=full --Ablate_config.dual_field=true --Ablate_config.tri_trad=true --Ablate_config.ba_trad=true
 ```
 
 #### Running with provided Scripts
