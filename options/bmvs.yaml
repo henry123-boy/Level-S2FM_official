@@ -4,8 +4,8 @@ MAX_SAMPLES: 100
 
 SDF:
   NN_Init:
-    bias: 0.5                                              # define the init sphere
-    scale_mlp: 1                                           # to scale up/down the init sdf value
+    bias: 1.                                              # define the init sphere
+    scale_mlp: 3                                           # to scale up/down the init sdf value
 
 data:
   inside: true
@@ -17,8 +17,8 @@ data:
     scale_init: 1
     rad_init: 5
   Fountain:
-    scale_init: 0.5
-    rad_init: 2
+    scale_init: 1.
+    rad_init: 2.2
   Statues:
     scale_init: 1
     rad_init: 3

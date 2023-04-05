@@ -13,7 +13,7 @@ pipeline:
 get_result: false
 vis_all_rgb: false
 arch: { }                                                    # architectural options
-
+nbv_mode: colmap
 data: # data options
   root:                                                   # root path to dataset
   dataset:                                                # dataset name
