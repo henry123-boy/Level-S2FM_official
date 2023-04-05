@@ -15,7 +15,7 @@ conda activate levels2fm
 
 
 
-python train.py --group=BlendedMVS --pipeline=LevelS2fM --yaml=bmvs --name=Fountain --data.dataset=BlendedMVS --data.scene=Fountain   --sfm_mode=full --nbv_mode=ours --refine_again=false
+python train.py --group=BlendedMVS --pipeline=LevelS2fM --yaml=bmvs --name=Fountain --data.dataset=BlendedMVS --data.scene=Fountain   --sfm_mode=full --refine_again=false
 
 
 
