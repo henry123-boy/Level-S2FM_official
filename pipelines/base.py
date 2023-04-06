@@ -186,7 +186,7 @@ class Model():
             extract_mesh(
                 self.sdf_func,
                 filepath=os.path.join(opt.mesh_dir, '{:08d}.ply'.format(view_ord)),
-                volume_size=3 if opt.data.dataset in ["DTU", "ETH3D"] else 7,
+                volume_size=3,
                 log=log,
                 show_progress=True,
                 extra_info=None,
