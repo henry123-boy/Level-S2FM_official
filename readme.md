@@ -4,9 +4,7 @@
 
 # Level-S<sup>2</sup>fM: Structure from Motion on Neural Level Set of Implicit Surfaces
 
-### [Project Page](https://henry123-boy.github.io/level-s2fm/) | [Paper](https://arxiv.org/pdf/2211.12018.pdf) | [Data](https://drive.google.com/file/d/13Ap_UA244OdqPwYlvSpMUcKt3CzrTKfS/view?usp=sharing) 
-
-
+### [Project Page](https://henry123-boy.github.io/level-s2fm/) | [Paper](https://arxiv.org/pdf/2211.12018.pdf) | [Data](https://drive.google.com/file/d/13Ap_UA244OdqPwYlvSpMUcKt3CzrTKfS/view)
 
 <img src='https://raw.githubusercontent.com/henry123-boy/henry123-boy.github.io/main/level-s2fm/static/images/teaser1-2.png'/>
 
