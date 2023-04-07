@@ -21,10 +21,10 @@ import numpy as np
 import open3d as o3d
 import open3d.visualization.gui as gui
 import open3d.visualization.rendering as rendering
-
+import matplotlib.cm as cm 
 
 def create_frustum(K, w2c=None):
-    near = 0.3 # near clipping plane
+    near = 0.2 # near clipping plane
     far = 1000.0 # far clipping plane
 
     width = K[0,2]*2
@@ -81,12 +81,14 @@ class PipelineView:
         self.pcdview.enable_scene_caching(
             True)  # makes UI _much_ more responsive
         self.pcdview.scene = rendering.Open3DScene(self.window.renderer)
+        self.pcdview.scene.set_lighting(
+            rendering.Open3DScene.LightingProfile.SOFT_SHADOWS, [0, -10, 0])
         self.pcdview.scene.set_background([1, 1, 1, 1])  # White background
 
         self.point_material = o3d.visualization.rendering.MaterialRecord()
         self.point_material.shader = "defaultLit"
-        self.point_material.point_size = 1.0
-        self.point_material.base_color = [1.0, 0.00, 0.0, 1.0]
+        self.point_material.point_size = 2.0
+        # self.point_material.base_color = [1.0, 0.00, 0.0, 1.0]
 
         self.cam_material = o3d.visualization.rendering.MaterialRecord()
         self.cam_material.shader = 'unlitLine'
@@ -150,11 +152,23 @@ class PipelineView:
         mesh = o3d.io.read_triangle_mesh(mesh_file)
         mesh.compute_vertex_normals()
         mesh.compute_triangle_normals()
+        vertices = np.array(mesh.vertices)
+        vertices_color = np.array([[192,192,192]]*vertices.shape[0])/255
+        # mesh.vertex_color = o3d.utility.Vector3dVector(vertices_color)
+        mesh.paint_uniform_color([0.6, 0.6, 0.6])
+        
         return mesh
     
     @staticmethod
     def load_pcd(pcd_file):
         pcd = o3d.io.read_point_cloud(pcd_file)
+        points = np.array(pcd.points)
+        colors = np.linalg.norm(points,axis=1)
+        colors = colors/np.max(colors)
+        rgb = cm.rainbow(colors)[:,:3]
+        # colors = colors/np.linalg.norm(colors,axis=1,keepdims=True)
+        pcd.colors = o3d.utility.Vector3dVector(rgb)
+        
         return pcd
 
     @staticmethod
@@ -208,8 +222,8 @@ class PipelineView:
         cameras = self.load_cameras(info['cam'])
         
         print(len(self.queue))
-        focal_length = 600
-        intrinsic = o3d.camera.PinholeCameraIntrinsic(width=self.width,height=self.height, fx=focal_length,fy=focal_length, cx=self.width//2, cy=self.height*0.6)
+        focal_length = 1000
+        intrinsic = o3d.camera.PinholeCameraIntrinsic(width=self.width,height=self.height, fx=focal_length,fy=focal_length, cx=self.width//2, cy=self.height*0.75)
         o3d_mat = np.array(
             [[0,1,0,0],
              [-1,0,0,0],
@@ -255,7 +269,7 @@ class PipelineView:
 
         def on_image(image):
             img = image
-            quality = 90
+            quality = 85
             path = f'{self.dest}/{self.cnt:06d}.jpg'
             o3d.io.write_image(path, img, quality)
         
