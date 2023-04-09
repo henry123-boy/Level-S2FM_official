@@ -87,7 +87,7 @@ class PipelineView:
 
         self.point_material = o3d.visualization.rendering.MaterialRecord()
         self.point_material.shader = "defaultLit"
-        self.point_material.point_size = 2.0
+        self.point_material.point_size = 3.0
         # self.point_material.base_color = [1.0, 0.00, 0.0, 1.0]
 
         self.cam_material = o3d.visualization.rendering.MaterialRecord()
@@ -123,6 +123,39 @@ class PipelineView:
             callbacks['on_toggle_fitview'])
         toggles.add_child(self.fit_view)
 
+        self.two_view = gui.Button("two-view")
+        self.two_view.is_on = False
+        self.two_view.set_on_clicked(
+            callbacks['on_toggle_two_view'])
+        toggles.add_child(self.two_view)
+
+        self.capture_view = gui.Button("Capture")
+        self.capture_view.is_on = False
+        self.capture_view.set_on_clicked(
+            callbacks['on_capture'])
+        toggles.add_child(self.capture_view)
+
+        clear_button = gui.Button("Clear")
+        clear_button.is_on = False
+        clear_button.set_on_clicked(
+            callbacks['on_clear'])
+        toggles.add_child(clear_button)
+
+        toggle_mesh_button = gui.ToggleSwitch("Mesh")
+        toggle_mesh_button.is_on = True
+        toggle_mesh_button.set_on_clicked(
+            callbacks['on_toggle_mesh'])
+
+        toggles.add_child(toggle_mesh_button)
+
+    
+        points_size_slider = gui.Slider(gui.Slider.DOUBLE)
+        points_size_slider.set_limits(0.1, 10)
+        points_size_slider.set_on_value_changed(self._on_point_size)
+        toggles.add_child(gui.Label("Point size"))
+        toggles.add_child(points_size_slider)
+
+
         self.window.add_child(self.pcdview)
         self.filesdict = filesdict 
 
@@ -147,6 +180,9 @@ class PipelineView:
         if not render:
             self.update(all=True)
 
+        self._on_point_size = 2
+        self.show_mesh = True
+
     @staticmethod
     def load_mesh(mesh_file):
         mesh = o3d.io.read_triangle_mesh(mesh_file)
@@ -166,9 +202,12 @@ class PipelineView:
         colors = np.linalg.norm(points,axis=1)
         colors = colors/np.max(colors)
         rgb = cm.rainbow(colors)[:,:3]
-        # colors = colors/np.linalg.norm(colors,axis=1,keepdims=True)
+
         pcd.colors = o3d.utility.Vector3dVector(rgb)
-        
+        rgb = np.zeros_like(points)
+        rgb[:,0] = 1.0
+        pcd.colors = o3d.utility.Vector3dVector(rgb)
+        # colors = colors/np.linalg.norm(colors,axis=1,keepdims=True)
         return pcd
 
     @staticmethod
@@ -193,6 +232,12 @@ class PipelineView:
 
         return cameras_dict
 
+    def _on_point_size(self, size):
+        # import pdb; pdb.set_trace()
+        if self.pcdview.scene.has_geometry('pcd'):
+            self.point_material.point_size = int(size)
+            self.pcdview.scene.modify_geometry_material('pcd',self.point_material)
+
 
     def toggle_fitview(self, is_on):
         # if is_on:
@@ -213,10 +258,69 @@ class PipelineView:
             
             
             self.pcdview.setup_camera(intrinsic, o3d_mat@cameras[-1].W2C, self.pcd_bounds)
- 
+    
+    def toggle_twoview(self):
+        info = self.filesdict[0]
+        pcd = self.load_pcd(info['pcd'])
+        cameras = self.load_cameras(info['cam'])
+
+        focal_length = 1000
+        intrinsic = o3d.camera.PinholeCameraIntrinsic(width=self.width,height=self.height, fx=focal_length,fy=focal_length, cx=self.width//2, cy=self.height*0.75)
+        o3d_mat = np.array(
+            [[0,1,0,0],
+             [-1,0,0,0],
+             [0,0,1,0],
+             [0,0,0,1]
+            ]
+        )
+        RT = cameras[-1].W2C
+
+        T_new = np.eye(4)
+        T_new[:3,3] = [0,0,np.linalg.norm(RT[:3,3])*2]
+        T_new[:3,:3] = Rotation.from_euler('xyz',[0,30,0],degrees=True).as_matrix()
+
+        w2c = o3d_mat@T_new@RT
+        
+        # self.pcdview.setup_camera(intrinsic, o3d_mat@cameras[-1].W2C, self.pcd_bounds)
+        self.pcdview.setup_camera(intrinsic, w2c, self.pcd_bounds)
+        self.pcdview.scene.clear_geometry()
+        # self.pcdview.scene.add_geometry('pcd',pcd,)
+        for i, cam in enumerate(cameras):
+            self.pcdview.scene.add_geometry(f'cam-{cam.id}',cam.frustum,self.cam_material)
+        
+        mesh = self.load_mesh(info['mesh'])
+        self.pcdview.scene.add_geometry('mesh', mesh,self.pcd_material)
+        self.pcdview.scene.add_geometry('pcd',pcd,self.point_material)
+
+    def clear_geometry(self):
+        self.pcdview.scene.clear_geometry()
+    def toggle_mesh(self, is_on):
+        self.show_mesh = is_on
+        if self.pcdview.scene.has_geometry('mesh'):
+            self.pcdview.scene.show_geometry('mesh', is_on)
+            self.pcdview.force_redraw()
+            return
+        
+        
+    def capture(self):
+        def on_image(image):
+            img = image
+            quality = 85
+            time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+            path = f'capture/{time}.jpg'
+            if not os.path.exists('capture'):
+                os.mkdir('capture')
+
+            o3d.io.write_image(path, img, quality)
+        
+        self.pcdview.force_redraw()
+        self.pcdview.scene.scene.render_to_image(on_image)
+        
+        
     def update(self, all=None):
         if len(self.queue) == 0:
             return 
+        
         info = self.queue[0] if not all else self.queue[-1]
         pcd = self.load_pcd(info['pcd'])
         cameras = self.load_cameras(info['cam'])
@@ -258,6 +362,9 @@ class PipelineView:
         # if self.cnt % 5 == 0:
         mesh = self.load_mesh(info['mesh'])
         self.pcdview.scene.add_geometry('mesh', mesh,self.pcd_material)
+        if not self.show_mesh:
+            self.pcdview.scene.show_geometry('mesh', False)
+
 
         if self.pcdview.scene.has_geometry('pcd'):
             self.pcdview.scene.remove_geometry('pcd')
@@ -276,8 +383,9 @@ class PipelineView:
         self.pcdview.force_redraw()
         self.pcdview.scene.scene.render_to_image(on_image)
         
-        self.queue.popleft()
-        self.cnt+=1
+        if not all:
+            self.queue.popleft()
+            self.cnt+=1
 
 
     def on_layout(self, layout_context):
