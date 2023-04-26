@@ -5,6 +5,7 @@ SDF:
     scale_mlp: 5                                           # to scale up/down the init sdf value
 
 data:
+  root: "levels2fm-opendata/ETH3D"
   inside: false
   image_size: [ 1033,1551 ]
   bound_max: [ 5., 5., 5. ]

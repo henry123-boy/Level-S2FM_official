@@ -52,7 +52,8 @@ class Model(base.Model):
         # prefetch all training data
         self.train_data.prefetch_all_data(opt)
         self.train_data.all = edict(util.move_to_device(self.train_data.all, opt.device))
-        n_views_geo_path = f"data/{opt.data.dataset}/{opt.data.scene}/n_views.npy"
+        # n_views_geo_path = f"data/{opt.data.dataset}/{opt.data.scene}/n_views.npy"
+        n_views_geo_path = f"{self.train_data.root}/n_views.npy"
         self.n_views_geo = np.load(n_views_geo_path, allow_pickle=True)
 
     def save_checkpoint(self, opt, ep=0, it=0, latest=True):
