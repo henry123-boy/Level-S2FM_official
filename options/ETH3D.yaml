@@ -35,3 +35,6 @@ data:
   terrace_2:
     scale_init: 0.4
     rad_init: 0
+
+sfm_mode: full
+refine_again: false
