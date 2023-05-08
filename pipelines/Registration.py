@@ -83,12 +83,12 @@ class Registration():
             return False, 0, 0
         if (len(p3d) < 100) & (if_nbv == False):
             return False, 0, len(p3d)
-        print("pnp found {} 3D-2D pairs".format(len(id_3d)))
+        # print("pnp found {} 3D-2D pairs".format(len(id_3d))) TODO: remove
         sdfs = self.sdf_func.infer_sdf(p3d).detach().cpu()
         mask = (sdfs < 0.05).squeeze()
         p3d = p3d.detach().cpu().numpy()[mask]
         p2d = p2d.detach().cpu().numpy()[mask]
-        print("pnp found {} masked 3D-2D pairs".format(len(p3d)))
+        # print("pnp found {} masked 3D-2D pairs".format(len(p3d))) TODO: remove
         # ---------- pnp --------------
         f, cx, cy = camera_new.f, camera_new.cx, camera_new.cy
         camera_colmap = pycolmap.Camera(model='SIMPLE_PINHOLE', width=self.opt.data.image_size[1],
@@ -99,9 +99,11 @@ class Registration():
             return False, 0, 0
         id_2d = id_2d[mask][answer['inliers']]
         id_3d = id_3d[mask][answer['inliers']]
+
+        print(f"PnP: {len(id_3d)} (found), {len(p3d)} (masked), {len(id_2d)} (inliers)")
         if (len(id_2d) < 100) & (if_nbv == False):
             return False, len(id_2d) / len(p3d), len(id_2d)
-        print("pnp solve {} inlier 3D-2D pairs".format(len(id_2d)))
+        # print("pnp solve {} inlier 3D-2D pairs".format(len(id_2d))) TODO: remove
         answer = pycolmap.pose_refinement(answer['tvec'], answer['qvec'], p2d, p3d, answer['inliers'], camera_colmap)
         # ----------update pose--------
         rot_absolute = pycolmap.qvec_to_rotmat(answer["qvec"])
@@ -274,7 +276,7 @@ class Registration():
             self.optim.step()
             self.sched.step()
             # -----------------------------------------
-        print(loss)
+        self.print_loss(loss)
         # -------------update feat tracks-------------------
         with torch.no_grad():
             tracing_loss_record = torch.cat(tracing_loss_record, dim=0)
@@ -313,3 +315,14 @@ class Registration():
                 loss_all += 10 ** float(opt.loss_weight.geoinit[key]) * loss[key]
         loss.update(all=loss_all)
         return loss
+
+    @torch.no_grad()
+    def print_loss(self, loss_dict, PSNR = None):
+        loss_dict_reduced = {}
+        if PSNR is not None:
+            loss_dict_reduced = {'PSNR': PSNR.item()}
+
+        for key in loss_dict.keys():
+            loss_dict_reduced[key] = loss_dict[key].item()
+
+        print(loss_dict_reduced)

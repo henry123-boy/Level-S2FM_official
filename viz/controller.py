@@ -32,6 +32,10 @@ class PipelineController:
             on_toggle_capture=self.on_toggle_capture,
             on_window_close=self.on_window_close,
             on_toggle_fitview = self.on_toggle_fitview,
+            on_toggle_two_view = self.on_toogle_two_view,
+            on_capture = self.on_capture,
+            on_clear = self.on_clear,
+            on_toggle_mesh = self.on_toggle_mesh,
             )
         self.render = render
         if self.render:
@@ -69,7 +73,25 @@ class PipelineController:
         rendered_images[1].save(f'{self.view.dest}.gif', save_all=True, append_images=rendered_images[1:], optimize=True, duration=100, loop=0)    
         
         # self.view.window.close()
+    def on_toggle_mesh(self, state):
+        gui.Application.instance.post_to_main_thread(
+            self.view.window,
+            lambda : self.view.toggle_mesh(state))
+    def on_clear(self):
+        gui.Application.instance.post_to_main_thread(
+            self.view.window,
+            self.view.clear_geometry)
+    def on_capture(self):
+        gui.Application.instance.post_to_main_thread(
+            self.view.window,
+            self.view.capture
+        )
+    def on_toogle_two_view(self):
+        gui.Application.instance.post_to_main_thread(
+            self.view.window,
+            self.view.toggle_twoview,
 
+        )
     def on_toggle_capture(self):
         self.update_view()
         
