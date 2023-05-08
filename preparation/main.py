@@ -102,6 +102,7 @@ def main():
     pairs, matches, scores = read_matches_from_db(f"{working_path}/database.db")
     db = COLMAPDatabase.connect(f"{working_path}/database.db")
 
+    os.makedirs(f"{working_path}/sparse", exist_ok=True)
     # run mapper to get the view order
     cmd = f'colmap mapper --database_path {working_path}/database.db --image_path {working_path}/images --output_path {working_path}/sparse > {working_path}/log.txt'
     os.system(cmd)

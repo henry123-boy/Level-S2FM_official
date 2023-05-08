@@ -52,8 +52,7 @@ class Model(base.Model):
         # prefetch all training data
         self.train_data.prefetch_all_data(opt)
         self.train_data.all = edict(util.move_to_device(self.train_data.all, opt.device))
-        # n_views_geo_path = f"data/{opt.data.dataset}/{opt.data.scene}/n_views.npy"
-        n_views_geo_path = f"{self.train_data.root}/n_views.npy"
+        n_views_geo_path = f"data/{opt.data.dataset}/{opt.data.scene}/n_views.npy"
         self.n_views_geo = np.load(n_views_geo_path, allow_pickle=True)
 
     def save_checkpoint(self, opt, ep=0, it=0, latest=True):
@@ -90,137 +89,6 @@ class Model(base.Model):
             var.masks.append(tem_dict["mask"])
         return var
 
-    def two_view_initialization(self, var, opt, image_id0, image_id1):
-        var.indx_init = [image_id0, image_id1] if ~opt.resume else self.cam_info_reloaded["cam_id"][:2]
-        var.imgs_init = self.train_data.all.image[var.indx_init]
-        var.kypts_init = [var.kypts[i] for i in var.indx_init]
-        var.intrs_init = self.train_data.all.intr[var.indx_init]
-        var.mchs_init = [var.matches[i] for i in var.indx_init]
-        var.inliers_init = [var.masks[i] for i in var.indx_init]
-        var.gt_depths = None
-
-        initialization_fn = Initialization.Initializer if ~opt.Ablate_config.tri_trad else Initialization_Trad.Initializer
-
-        Initializer = initialization_fn(opt, 
-                self.camera_set, 
-                self.point_set, 
-                self.sdf_func,
-                self.color_func,
-                var,
-                cam_info_reloaded=self.cam_info_reloaded,)
-        if ~opt.resume:
-            Initializer.run(self.camera_set, self.point_set,
-                                    self.sdf_func, self.color_func, Renderer=self.Renderer)
-            self.save_checkpoint(opt, ep=None, it=self.it + 1, latest=False)
-            self.vis_geo_rgb(opt, cameraset=self.camera_set, new_camera=self.camera_set.cameras[0],
-                                pointset=self.point_set, vis_only=True, cam_only=False)
-        random_view = slerp(self.camera_set.cameras[0].get_pose()[0], self.camera_set.cameras[1].get_pose()[0], 0.5)                          
-
-        return True
-
-    def find_next_best_view(self, pose_graph_left, var, opt, nbv_if = False):
-        pnp_num_matches = []
-        pnp_inlier_ratio = []
-        pnp_views = []
-        for new_id in pose_graph_left:
-            image_new = self.train_data.all.image[new_id:new_id + 1]
-            camera_new = Camera.Camera(
-                opt=opt,
-                id = new_id,
-                img_gt=image_new,
-                pose_gt = var.poses_gt[new_id:new_id+1],
-                kypts2D=var.kypts[new_id],
-                Match_mask=var.matches[new_id],
-                Inlier_mask=var.masks[new_id],
-                Intrinsic=self.train_data.all.intr[new_id],
-            )
-
-            Register = Registration.Registration(opt, self.sdf_func, cameraset=self.camera_set)
-            register_sucess, inlier_num_ratio, inlier_num = Register.PnP(camera_new=camera_new, pointset=self.point_set, if_nbv=nbv_if)
-            pnp_num_matches.append(inlier_num)
-            pnp_inlier_ratio.append(inlier_num_ratio)
-            pnp_views.append(len(Register.src_cam_id))
-        
-        print("---------- max inlier 3d-2d --------------")
-        print(pnp_inlier_ratio)
-        pnp_num_matches = np.array(pnp_num_matches)
-        pnp_inlier_ratio = np.array(pnp_inlier_ratio)
-        pnp_views = np.array(pnp_views)
-        pnp_score = pnp_inlier_ratio * np.clip(pnp_views, 0, 10) + pnp_num_matches / np.max(pnp_num_matches)
-        nbv = np.argmax(pnp_score)
-        print("--------- max number is {} --------------".format(pnp_num_matches[nbv]))
-        new_id = pose_graph_left[nbv]
-        print(f"-------------the best view next id is {new_id}--------------")
-
-        return new_id
-
-    def register_new_view(self, new_id, var, opt):
-        image_new = self.train_data.all.image[new_id:new_id + 1]
-        camera_new = Camera.Camera(
-            opt=opt,
-            id = new_id,
-            img_gt=image_new,
-            pose_gt = var.poses_gt[new_id:new_id+1],
-            kypts2D=var.kypts[new_id],
-            Match_mask=var.matches[new_id],
-            Inlier_mask=var.masks[new_id],
-            Intrinsic=self.train_data.all.intr[new_id],
-        )
-        print(f"Total cameras num:{len(self.camera_set.cam_ids)}")
-        print(f"New view: {new_id}")
-
-        register_fn = Registration.Registration if ~opt.Ablate_config.tri_trad else Registration_Trad.Registration
-
-        Register = register_fn(opt, self.sdf_func, cameraset=self.camera_set)
-
-        register_sucess, inlier_num_ratio, inlier_num = Register.PnP(camera_new=camera_new, pointset=self.point_set, if_nbv=True)
-
-        rot_error, t_error = self.camera_set.eval_poses()
-        if not register_sucess:
-            return False, None
-        self.camera_set.add_camera(id=camera_new.id, CameraNew=camera_new)
-        rot_error, t_error = Register.eval_local_pose(camera_new)
-        src_cam_id = Register.geo_init_nf(camera_new=camera_new, 
-            sdf_func=self.sdf_func,
-            pointset=self.point_set)
-        del Register
-        return True, src_cam_id
-
-    def trad_bundle_adjustment(self, opt, var, src_cam_id, camera_new):
-        mode = 'sfm'
-        Local_BA_id = [camera_new.id] + src_cam_id
-        Bundler = BA_Trad.BA(
-            opt=opt,
-            cameraset=self.camera_set,
-            pointset=self.point_set,
-            sdf_func=self.sdf_func,
-            color_func=self.color_func,
-            cam_pick_ids=Local_BA_id,
-            mode=mode
-        )
-        reproj_tem = Bundler.run_ba(sdf_func=self.sdf_func,
-                color_func=self.color_func,
-                Renderer=self.Renderer)
-        rot_error, t_error = self.camera_set.eval_poses(pick_cam_id=src_cam_id + [camera_new.id])
-        del Bundler
-        torch.cuda.empty_cache()
-        # global ba
-        Bundler = BA_Trad.BA(opt=opt,
-                                cameraset=self.camera_set,
-                                pointset=self.point_set,
-                                sdf_func=self.sdf_func,
-                                color_func=self.color_func,
-                                mode=mode
-                                )
-        reproj_tem = Bundler.run_ba(sdf_func=self.sdf_func,
-                                    color_func=self.color_func,
-                                    Renderer=self.Renderer)
-        rot_error, t_error = self.camera_set.eval_poses()
-        del Bundler
-        torch.cuda.empty_cache()
-
-    def neural_bundle_adjustment(self, opt, var, src_cam_id, camera_new):
-        pass
     def train(self, opt):
         self.timer = edict(start=time.time(), it_mean=None)
         self.ep = 0  # dummy for timer
@@ -255,12 +123,64 @@ class Model(base.Model):
 
         random_view = None
 
+        rendered_rgb_list = []
         for self.it in loader:
             var.iter = self.it
+            if random_view is not None:
+                rendered_output = self.camera_set.cameras[0].render_img_by_slices(
+                    self.sdf_func,
+                    self.color_func,
+                    self.Renderer,
+                    random_view
+                )
+                rendered_rgb = rendered_output['rgb'][0].reshape(*opt.data.image_size,3).cpu().numpy()
+
+                rendered_rgb_list.append(rendered_rgb)
+                # import matplotlib.pyplot as plt 
+                # for rgb_ in rendered_rgb_list:
+                #     plt.imshow(rgb_)
+                #     plt.show()
+                # import pdb; pdb.set_trace()
             if len(self.camera_set) < 2:
                 # Initialization
-                self.two_view_initialization(var, opt, pose_graph[0], pose_graph[1])
-                import pdb; pdb.set_trace()
+                if opt.resume == False:
+                    var.indx_init = [pose_graph[0], pose_graph[1]]
+                else:
+                    var.indx_init = self.cam_info_reloaded["cam_id"][:2]
+                var.imgs_init = self.train_data.all.image[var.indx_init]
+                var.kypts_init = [var.kypts[i] for i in var.indx_init]
+                var.intrs_init = self.train_data.all.intr[var.indx_init]
+                var.mchs_init = [var.matches[i] for i in var.indx_init]
+                var.inliers_init = [var.masks[i] for i in var.indx_init]
+                var.gt_depths = None
+
+                if opt.Ablate_config.tri_trad == True:
+                    Initializer = Initialization_Trad.Initializer(opt, self.camera_set, self.point_set,
+                                                                  self.sdf_func, self.color_func, var,
+                                                                  cam_info_reloaded=self.cam_info_reloaded)
+                else:
+                    Initializer = Initialization.Initializer(opt, self.camera_set, self.point_set,
+                                                             self.sdf_func, self.color_func, var,
+                                                             cam_info_reloaded=self.cam_info_reloaded)
+
+                # opt.mesh_dir = "{0}/mesh".format(opt.output_path)
+                # extract_mesh(
+                #     self.color_func,
+                #     filepath=os.path.join(opt.mesh_dir, 'init.ply'),
+                #     volume_size=2 if opt.data.dataset in ["DTU", "ETH3D"] else 7,
+                #     log=log,
+                #     show_progress=True,
+                #     extra_info=self.sdf_func,
+                #     N=512)
+                if opt.resume == False:
+                    Initializer.run(self.camera_set, self.point_set,
+                                    self.sdf_func, self.color_func, Renderer=self.Renderer)
+                    self.save_checkpoint(opt, ep=None, it=self.it + 1, latest=False)
+                    self.vis_geo_rgb(opt, cameraset=self.camera_set, new_camera=self.camera_set.cameras[0],
+                                     pointset=self.point_set, vis_only=True, cam_only=False)
+
+                random_view = slerp(self.camera_set.cameras[0].get_pose()[0], self.camera_set.cameras[1].get_pose()[0], 0.5)                                
+                del Initializer
             else:
                 if (opt.resume == True) & (load_finish == False):
                     print("------reloading cameras-------")
@@ -321,8 +241,44 @@ class Model(base.Model):
                     print(f"finish!")
 
                 print("---------- searching next best view -------------")
-                new_id = self.find_next_best_view(pose_graph_left, var, opt, nbv_if=nbv_if) if opt.nbv_mode != "colmap" else pose_graph_left[0]
-                
+                if opt.nbv_mode == "colmap":
+                    new_id = pose_graph_left[0]
+                else:
+                    pnp_num_mches = []
+                    pnp_inlier_ratio = []
+                    pnp_views = []
+                    for new_id_i in pose_graph_left:
+                        new_id = new_id_i
+                        img_new = self.train_data.all.image[new_id:new_id + 1]
+                        camera_new = Camera.Camera(opt=opt,
+                                                   id=new_id,
+                                                   img_gt=img_new,
+                                                   pose_gt=var.poses_gt[new_id:new_id + 1],
+                                                   kypts2D=var.kypts[new_id],
+                                                   Match_mask=var.matches[new_id],
+                                                   Inlier_mask=var.masks[new_id],
+                                                   Intrinsic=self.train_data.all.intr[new_id],
+                                                   Depth_omn=None,
+                                                   Normal_omn=None,
+                                                   Extrinsic=None,
+                                                   idx2d_to_3d=None)
+                        Register = Registration.Registration(opt, self.sdf_func, cameraset=self.camera_set)
+                        register_sucess, inlier_num_ratio, inlier_num = Register.PnP(camera_new=camera_new,
+                                                                                     pointset=self.point_set,
+                                                                                     if_nbv=nbv_if)
+                        pnp_num_mches.append(inlier_num)
+                        pnp_inlier_ratio.append(inlier_num_ratio)
+                        pnp_views.append(len(Register.src_cam_id))
+                        print(len(Register.src_cam_id))
+                    print("---------- max inlier 3d-2d --------------")
+                    print(pnp_inlier_ratio)
+                    pnp_num_mches = np.array(pnp_num_mches)
+                    pnp_inlier_ratio = np.array(pnp_inlier_ratio)
+                    pnp_views = np.array(pnp_views)
+                    pnp_score = pnp_inlier_ratio * np.clip(pnp_views, 0, 10) + pnp_num_mches / np.max(pnp_num_mches)
+                    nbv = np.argmax(pnp_score)
+                    print("--------- max number is {} --------------".format(pnp_num_mches[nbv]))
+                    new_id = pose_graph_left[nbv]
                 print(f"-------------the best view next id is {new_id}--------------")
                 img_new = self.train_data.all.image[new_id:new_id + 1]
                 camera_new = Camera.Camera(opt=opt,
@@ -339,13 +295,55 @@ class Model(base.Model):
                                            idx2d_to_3d=None)
                 print(f"Total cameras num:{len(self.camera_set.cam_ids)}")
                 print(f"new cam_id: {new_id}")
-
                 # -------------------Registration: PnP+Triangulation----------------------------------------------
-                register_sucess, src_cam_id = self.register_new_view(new_id, var, opt)
+                if opt.Ablate_config.tri_trad == True:
+                    Register = Registration_Trad.Registration(opt, self.sdf_func, cameraset=self.camera_set)
+                else:
+                    Register = Registration.Registration(opt, self.sdf_func, cameraset=self.camera_set)
+                register_sucess, inlier_num_ratio, inlier_num = Register.PnP(camera_new=camera_new,
+                                                                             pointset=self.point_set, if_nbv=True)
+                rot_error, t_error = self.camera_set.eval_poses()
+                if register_sucess == False:
+                    print("reconstruct fail")
+                    return
+                else:
+                    self.camera_set.add_camera(id=camera_new.id, CameraNew=camera_new)
+                rot_error, t_error = Register.eval_local_pose(camera_new)
+                src_cam_id = Register.geo_init_nf(camera_new=camera_new, sdf_func=self.sdf_func,
+                                                  pointset=self.point_set)
+                del Register
                 torch.cuda.empty_cache()
                 if opt.Ablate_config.ba_trad == True:
                     # local ba
-                    self.trad_bundle_adjustment(opt, var, src_cam_id, camera_new)                   
+                    mode = "sfm"
+                    Local_BA_id = [camera_new.id] + src_cam_id
+                    Bundler = BA_Trad.BA(opt=opt,
+                                         cameraset=self.camera_set,
+                                         pointset=self.point_set,
+                                         sdf_func=self.sdf_func,
+                                         color_func=self.color_func,
+                                         cam_pick_ids=Local_BA_id,
+                                         mode=mode)
+                    reproj_tem = Bundler.run_ba(sdf_func=self.sdf_func,
+                                                color_func=self.color_func,
+                                                Renderer=self.Renderer)
+                    rot_error, t_error = self.camera_set.eval_poses(pick_cam_id=src_cam_id + [camera_new.id])
+                    del Bundler
+                    torch.cuda.empty_cache()
+                    # global ba
+                    Bundler = BA_Trad.BA(opt=opt,
+                                         cameraset=self.camera_set,
+                                         pointset=self.point_set,
+                                         sdf_func=self.sdf_func,
+                                         color_func=self.color_func,
+                                         mode=mode
+                                         )
+                    reproj_tem = Bundler.run_ba(sdf_func=self.sdf_func,
+                                                color_func=self.color_func,
+                                                Renderer=self.Renderer)
+                    rot_error, t_error = self.camera_set.eval_poses()
+                    del Bundler
+                    torch.cuda.empty_cache()
                 else:
                     # ------------------Registration fusion-------------------------------------------------------------------
                     if opt.sfm_mode == "full":
